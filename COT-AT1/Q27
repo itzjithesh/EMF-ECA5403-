@@ -1,1 +1,115 @@
+// ============================================================
+// Q27: EFFECT OF LOAD IMPEDANCE ON REFLECTION COEFFICIENT
+//      AND TRANSMITTED POWER
+// ============================================================
+// Software : Scilab
+// Application : Transmission Line Analysis
+// ============================================================
 
+clc;
+clear;
+close;
+
+// -------------------- PARAMETERS ----------------------------
+
+Z0 = 50;                    // Characteristic impedance (Ohms)
+
+// Load impedance values
+ZL = [10, 25, 40, 50, 75, 100, 150, 300];
+
+// Incident power
+P_incident = 1;             // Normalized to 1 Watt
+
+// -------------------- CALCULATIONS ---------------------------
+
+// Reflection coefficient
+Gamma = (ZL - Z0) ./ (ZL + Z0);
+
+// Magnitude of reflection coefficient
+Gamma_mag = abs(Gamma);
+
+// Reflected power
+P_reflected = P_incident * Gamma_mag.^2;
+
+// Transmitted / delivered power
+P_transmitted = P_incident * (1 - Gamma_mag.^2);
+
+// Percentage of transmitted power
+P_transmitted_percent = P_transmitted / P_incident * 100;
+
+// VSWR
+VSWR = (1 + Gamma_mag) ./ (1 - Gamma_mag);
+
+// -------------------- DISPLAY TABLE --------------------------
+
+mprintf("\n============================================================\n");
+mprintf(" LOAD IMPEDANCE - REFLECTION AND POWER ANALYSIS\n");
+mprintf("============================================================\n");
+
+mprintf("Characteristic Impedance Z0 = %.2f Ohms\n", Z0);
+mprintf("Incident Power             = %.2f W\n", P_incident);
+
+mprintf("\n------------------------------------------------------------\n");
+mprintf(" ZL(Ohm)    |Gamma|      Reflected(W)    Transmitted(W)    VSWR\n");
+mprintf("------------------------------------------------------------\n");
+
+for k = 1:length(ZL)
+
+    mprintf(" %-10.2f %-11.4f %-15.4f %-17.4f %.3f\n", ...
+        ZL(k), ...
+        Gamma_mag(k), ...
+        P_reflected(k), ...
+        P_transmitted(k), ...
+        VSWR(k));
+
+end
+
+mprintf("------------------------------------------------------------\n");
+
+// -------------------- PLOT 1 -------------------------------
+
+scf(1);
+clf();
+
+plot(ZL, Gamma_mag, "o-");
+
+xlabel("Load Impedance ZL (Ohms)");
+ylabel("|Gamma|");
+
+title("Reflection Coefficient Magnitude vs Load Impedance");
+
+xgrid();
+
+// -------------------- PLOT 2 -------------------------------
+
+scf(2);
+clf();
+
+plot(ZL, P_transmitted_percent, "s-");
+
+xlabel("Load Impedance ZL (Ohms)");
+ylabel("Transmitted Power (%)");
+
+title("Transmitted Power vs Load Impedance");
+
+xgrid();
+
+// -------------------- PLOT 3 -------------------------------
+
+scf(3);
+clf();
+
+plot(ZL, VSWR, "d-");
+
+xlabel("Load Impedance ZL (Ohms)");
+ylabel("VSWR");
+
+title("VSWR vs Load Impedance");
+
+xgrid();
+
+// -------------------- END -----------------------------------
+
+mprintf("\n============================================================\n");
+mprintf("Simulation completed successfully.\n");
+mprintf("============================================================\n");

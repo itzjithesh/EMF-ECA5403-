@@ -1,1 +1,93 @@
+// ============================================================
+// Q25: INPUT IMPEDANCE OF AN OPEN-CIRCUITED TRANSMISSION LINE
+// ============================================================
+// Software : Scilab
+// Application : Transmission Line Simulation
+// ============================================================
 
+clc;
+clear;
+close;
+
+// -------------------- PARAMETERS ----------------------------
+
+Z0 = 50;                    // Characteristic impedance (Ohms)
+v  = 3e8;                   // Wave propagation velocity (m/s)
+l  = 0.10;                  // Transmission line length (m)
+
+// Frequency range
+f_start = 1e6;              // 1 MHz
+f_stop  = 3e9;              // 3 GHz
+N = 5000;
+
+f = linspace(f_start, f_stop, N);
+
+// -------------------- PHASE CONSTANT ------------------------
+
+beta = (2 * %pi * f) / v;
+
+// -------------------- INPUT IMPEDANCE ------------------------
+// Open-circuit transmission line:
+// Zin = -j * Z0 * cot(beta*l)
+
+theta = beta * l;
+
+sin_theta = sin(theta);
+
+// Avoid numerical singularities
+for k = 1:N
+    if abs(sin_theta(k)) < 1e-8 then
+        sin_theta(k) = 1e-8;
+    end
+end
+
+Zin = -%i * Z0 * cos(theta) ./ sin_theta;
+
+// Magnitude and phase
+Zin_mag = abs(Zin);
+Zin_phase = atan(imag(Zin), real(Zin)) * 180 / %pi;
+
+// Limit extreme values for clearer visualization
+Zin_plot = Zin_mag;
+
+for k = 1:N
+    if Zin_plot(k) > 5000 then
+        Zin_plot(k) = 5000;
+    end
+end
+
+// -------------------- DISPLAY RESULTS ------------------------
+
+mprintf("\n==============================================\n");
+mprintf(" OPEN-CIRCUITED TRANSMISSION LINE SIMULATION\n");
+mprintf("==============================================\n");
+mprintf("Characteristic Impedance : %.2f Ohms\n", Z0);
+mprintf("Line Length              : %.3f m\n", l);
+mprintf("Propagation Velocity     : %.3e m/s\n", v);
+mprintf("Frequency Range          : %.1f MHz to %.1f GHz\n", ...
+        f_start/1e6, f_stop/1e9);
+mprintf("==============================================\n");
+
+// -------------------- PLOT 1 -------------------------------
+
+scf(1);
+plot(f/1e9, Zin_plot);
+
+xlabel("Frequency (GHz)");
+ylabel("|Zin| (Ohms)");
+title("Open-Circuited Transmission Line: Input Impedance vs Frequency");
+xgrid();
+
+// -------------------- PLOT 2 -------------------------------
+
+scf(2);
+plot(f/1e9, Zin_phase);
+
+xlabel("Frequency (GHz)");
+ylabel("Phase of Zin (degrees)");
+title("Open-Circuited Transmission Line: Input Impedance Phase");
+xgrid();
+
+// -------------------- END -----------------------------------
+
+mprintf("\nSimulation completed successfully.\n");

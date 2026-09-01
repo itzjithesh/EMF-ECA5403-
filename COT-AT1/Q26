@@ -1,1 +1,99 @@
+// ============================================================
+// Q26: INPUT IMPEDANCE OF A SHORT-CIRCUITED TRANSMISSION LINE
+// ============================================================
+// Software : Scilab
+// Application : Transmission Line Simulation
+// ============================================================
 
+clc;
+clear;
+close;
+
+// -------------------- PARAMETERS ----------------------------
+
+Z0 = 50;                    // Characteristic impedance (Ohms)
+v  = 3e8;                   // Propagation velocity (m/s)
+
+// Different transmission-line lengths
+lengths = [0.05, 0.10, 0.20, 0.30];
+
+N = 5000;
+
+f_start = 1e6;
+f_stop  = 3e9;
+
+f = linspace(f_start, f_stop, N);
+
+// -------------------- CREATE FIGURE --------------------------
+
+scf(1);
+clf();
+
+// -------------------- SIMULATE EACH LENGTH -------------------
+
+for n = 1:length(lengths)
+
+    l = lengths(n);
+
+    // Phase constant
+    beta = (2 * %pi * f) / v;
+
+    theta = beta * l;
+
+    // Short-circuit input impedance
+    // Zin = j * Z0 * tan(beta*l)
+
+    Zin = %i * Z0 * tan(theta);
+
+    // Magnitude
+    Zin_mag = abs(Zin);
+
+    // Limit very high values caused by mathematical singularities
+    Zin_plot = Zin_mag;
+
+    for k = 1:N
+        if Zin_plot(k) > 5000 then
+            Zin_plot(k) = 5000;
+        end
+    end
+
+    // Plot
+    plot(f/1e9, Zin_plot);
+
+end
+
+// -------------------- GRAPH FORMATTING -----------------------
+
+xlabel("Frequency (GHz)");
+ylabel("|Zin| (Ohms)");
+
+title("Short-Circuited Transmission Line: Input Impedance vs Frequency");
+
+legend( ...
+    "L = 0.05 m", ...
+    "L = 0.10 m", ...
+    "L = 0.20 m", ...
+    "L = 0.30 m", ...
+    "in_upper_right" ...
+);
+
+xgrid();
+
+// -------------------- INFORMATION ----------------------------
+
+mprintf("\n==============================================\n");
+mprintf(" SHORT-CIRCUITED TRANSMISSION LINE SIMULATION\n");
+mprintf("==============================================\n");
+mprintf("Characteristic Impedance : %.2f Ohms\n", Z0);
+mprintf("Propagation Velocity     : %.3e m/s\n", v);
+mprintf("Frequency Range          : %.1f MHz to %.1f GHz\n", ...
+        f_start/1e6, f_stop/1e9);
+
+mprintf("\nTransmission Line Lengths:\n");
+
+for n = 1:length(lengths)
+    mprintf("  Line %d : %.2f m\n", n, lengths(n));
+end
+
+mprintf("==============================================\n");
+mprintf("\nSimulation completed successfully.\n");
